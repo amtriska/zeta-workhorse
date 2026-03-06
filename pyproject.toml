@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "zeta-workhorse"
-version = "0.1.0"
+version = "0.1.1"
 description = "A calculator for graph zeta functions and spectral gaps."
 authors = [
   { name="Andrew Triska", email="amtriska@gmail.com" }
