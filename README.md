@@ -14,7 +14,7 @@ The functions in this library compute the reciprocal (or inverse) zeta polynomia
   Useful for analyzing standard closed walks and path counting.
 * **Spectral zeta**: $\zeta(s) = \sum \lambda_i^{-s}$
   Calculated from the non-zero eigenvalues ($\lambda_i$) of the graph Laplacian. It serves as a graph-theoretic analog to the Riemann zeta function and is used to compute structural invariants.
-* **Tropical zeta**: $Z_{trop}(k) = \min_{v} (A^{\otimes k})_{v,v}$
+* **Tropical trace**: $Z_{trop}(k) = \min_{v} (A^{\otimes k})_{v,v}$
   Evaluated using min-plus algebra. By calculating tropical matrix powers ($A^{\otimes k}$), this function determines the minimum cost of cycles up to a specified length for network optimization.
 * **Ihara gap**: $|u_1| - |u_0|$
   Isolates the roots of the reciprocal Ihara zeta polynomial, determines their absolute values (magnitudes), sorts them in ascending order, and finds the difference between the two smallest distinct values. The gap is useful for measuring expansion properties based specifically on non-backtracking walks. Networks with an optimally large Ihara gap are known as Ramanujan graphs, which represent the theoretical ideal of a network being completely sparse yet highly connected.
@@ -46,7 +46,7 @@ print(ihara_gap_result)
 **API Reference**
 * **`load_csv(file_path, data_type)`**: Requires `file_path` (string) and `data_type` (type). Returns a NumPy array.
 * **`load_gml(gml_file_path, data_type)`**: Requires `gml_file_path` (string) and `data_type` (type). Returns a NumPy array. Currently supports unweighted graphs.
-* **`tropical_zeta(A, max_k)`**: Requires `A` (NumPy array: a square array with two axes) and `max_k` (integer). Calculates the sequence of minimum cycle costs up to length `max_k`. Automatically converts structural zeros to infinity. Returns a list of floats.
+* **`tropical_trace(A, max_k)`**: Requires `A` (NumPy array: a square array with two axes) and `max_k` (integer). Calculates the sequence of minimum cycle costs up to length `max_k`. Automatically converts structural zeros to infinity. Returns a list of floats.
 * **`ihara_zeta(A)`**: Requires `A` (NumPy array: a square array with two axes). Returns a SymPy expression in terms of `u`.
 * **`bartholdi_zeta(A, t_val=None)`**: Requires `A` (NumPy array: a square array with two axes). Returns a SymPy expression in terms of `u` and `t`. If `t_val` (float or integer) is provided, evaluates the expression at that value.
 * **`spectral_zeta(A)`**: Requires `A` (NumPy array: a square array with two axes). Returns a SymPy expression in terms of `s`.

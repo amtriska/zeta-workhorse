@@ -105,11 +105,11 @@ def tropical_power(A, k):
         result = tropical_multiply(result, A)
     return result
 
-def tropical_zeta(A, max_k):
-    zeta_sequence = []
+def tropical_trace(A, max_k):
+    sequence = []
     tropical_A = np.where(A != 0, A, np.inf)
     for i in range(1, max_k + 1):
         current_power_matrix = tropical_power(tropical_A, i)
         diag = np.diag(current_power_matrix)
-        zeta_sequence.append(float(np.min(diag)))
-    return zeta_sequence
+        sequence.append(float(np.min(diag)))
+    return sequence

@@ -2,7 +2,7 @@ from zeta_workhorse import load_gml, tropical_zeta
 
 try:
     data = load_gml("karate.gml", data_type = float)
-    tropical_result = tropical_zeta(data, 5)
+    tropical_result = tropical_trace(data, 5)
     print("The sequence of minimum cycle costs up to length 5 is: ", tropical_result)
     input("Press Enter to continue.\n")
 except Exception as error:
