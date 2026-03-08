@@ -31,7 +31,7 @@ Each zeta function is available in two variants. The `_poly` variants use SymPy'
 
 **`_roots` functions and eigenvalue-based functions** (`ihara_zeta_roots`, `bartholdi_zeta_roots`, `bowen_lanford_zeta_roots`, `spectral_zeta_val`, `fiedler_value`, `laplacian_gap`) use dense matrix eigenvalue routines running in $O(V^3)$ time and require $O(V^2)$ memory. The Ihara and Bartholdi `_roots` functions operate on a $2V \times 2V$ companion matrix, making them approximately eight times more memory-intensive than the others. These functions become impractical on graphs with more than a few thousand nodes on typical hardware.
 
-**`tropical_trace`** runs in $O(\text{max_k} \cdot V^3)$ time. For large graphs, keep `max_k` as small as possible.
+**`tropical_trace`** runs in O(max_k · V³) time. For large graphs, keep max_k as small as possible.
 
 **Installation**
 ```bash
@@ -81,4 +81,4 @@ print(gap)
 * **`laplacian_gap(A, k)`**: Requires `A` (NumPy array) and `k` (integer, must be ≥ 2). Returns a float representing the eigengap $\lambda_{k+1} - \lambda_k$ between the $k$-th and $(k+1)$-th smallest non-zero Laplacian eigenvalues. Raises a `ValueError` if the graph is disconnected or if `k` exceeds the number of available eigenvalues. Filters eigenvalues smaller than 1e-10.
 
 **Tropical trace**
-* **`tropical_trace(A, max_k, mode="min")`**: Requires `A` (NumPy array) and `max_k` (integer). The optional `mode` parameter accepts `"min"` (default, min-plus algebra — finds minimum-cost cycles) or `"max"` (max-plus algebra — finds maximum-cost cycles). Evaluates the tropical trace sequence $Z_{trop}(1), \ldots, Z_{trop}(\text{max_k})$. Structural zeros are automatically converted to the appropriate identity element ($+\infty$ for min, $-\infty$ for max). Returns a list of floats. Runtime scales as $O(\text{max_k} \cdot V^3)$; keep `max_k` small for large graphs.
+* **`tropical_trace(A, max_k, mode="min")`**: Requires `A` (NumPy array) and `max_k` (integer). The optional `mode` parameter accepts `"min"` (default, min-plus algebra, finds minimum-cost cycles) or `"max"` (max-plus algebra, finds maximum-cost cycles). Evaluates the tropical trace sequence from k=1 to k=`max_k`. Structural zeros are automatically converted to the appropriate identity element (+∞ for min, −∞ for max). Returns a list of floats. Runtime scales as O(`max_k` · V³); keep `max_k` small for large graphs.
