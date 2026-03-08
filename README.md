@@ -1,4 +1,4 @@
-# zeta_workhorse
+# zeta-workhorse
 
 **Overview**
 This library calculates graph zeta functions and spectral gaps using the graph's adjacency matrix. It can directly parse a comma-separated adjacency matrix (.CSV) or accept an undirected graph file in GraphML (.GML) format. All zeta functions treat input graphs as unweighted. Weighted graphs are supported by `tropical_trace`, `spectral_zeta_val`, `fiedler_value`, and `laplacian_gap`, which operate directly on the Laplacian or adjacency matrix.
