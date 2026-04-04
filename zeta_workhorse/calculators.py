@@ -82,7 +82,7 @@ def spectral_zeta_val(A, s):
     L = D - A
     eigenvals = np.linalg.eigvals(L)
     threshold = 1e-10
-    zeta_spec_val = np.sum(eigenvals[eigenvals > threshold]**(-s))
+    zeta_spec_val = np.sum(eigenvals[np.abs(eigenvals) > threshold]**(-s))
     return zeta_spec_val
 
 def bowen_lanford_zeta_roots(A):
