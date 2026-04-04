@@ -4,7 +4,7 @@ try:
     print("Calculating...")    
     trop_data = load_gml("karate_weighted.gml", data_type = float, weight_field = "value")
     ihara_data = load_csv("barbell.csv", data_type = float)
-    tropical_result = tropical_trace(trop_data, 10, min)
+    tropical_result = tropical_trace(trop_data, 10, "min")
     ihara_result = ihara_zeta_poly(ihara_data)
     print("The sequence of minimum cycle costs up to length 10 for the weighted Karate Club dataset is: ")
     print(tropical_result)
