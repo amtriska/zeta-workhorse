@@ -33,7 +33,7 @@ Each zeta function is available in two variants. The `_poly` variants use SymPy'
 
 **`fiedler_value` and `laplacian_gap`** use sparse eigenvalue decomposition via SciPy's ARPACK interface with shift-invert, requesting only as many eigenvalues as needed — 2 for `fiedler_value` and $k+1$ for `laplacian_gap`. Both run in approximately $O(k \cdot E)$ time where $E$ is the number of edges, making them efficient on large sparse graphs.
 
-**`tropical_trace`** runs in $O(\text{max\_k} \cdot V^3)$ time. For large graphs, keep `max_k` as small as possible.
+**`tropical_trace`** runs in O(`max_k` · V³) time. For large graphs, keep `max_k` as small as possible.
 
 **Installation**
 ```bash
@@ -83,4 +83,4 @@ print(gap)
 * **`laplacian_gap(A, k)`**: Requires `A` (NumPy array) and `k` (integer, must be ≥ 2). Returns a float representing the eigengap $\lambda_{k+1} - \lambda_k$ between the $k$-th and $(k+1)$-th smallest non-zero Laplacian eigenvalues. Uses sparse eigenvalue decomposition, requesting only the $k+1$ smallest eigenvalues. Raises a `ValueError` if the graph is disconnected or if `k` < 2.
 
 **Tropical trace**
-* **`tropical_trace(A, max_k, mode="min")`**: Requires `A` (NumPy array) and `max_k` (integer). The optional `mode` parameter accepts `"min"` (default, min-plus algebra, finds minimum-cost cycles) or `"max"` (max-plus algebra, finds maximum-cost cycles). Evaluates the tropical trace sequence from k=1 to k=`max_k`. Structural zeros are automatically converted to the appropriate identity element (+∞ for min, −∞ for max). Returns a list of floats. Runtime scales as $O(\text{max\_k} \cdot V^3)$; keep `max_k` small for large graphs.
+* **`tropical_trace(A, max_k, mode="min")`**: Requires `A` (NumPy array) and `max_k` (integer). The optional `mode` parameter accepts `"min"` (default, min-plus algebra, finds minimum-cost cycles) or `"max"` (max-plus algebra, finds maximum-cost cycles). Evaluates the tropical trace sequence from k=1 to k=`max_k`. Structural zeros are automatically converted to the appropriate identity element (+∞ for min, −∞ for max). Returns a list of floats. Runtime scales as O(`max_k` · V³); keep `max_k` small for large graphs.
