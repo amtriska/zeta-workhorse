@@ -1,6 +1,8 @@
 import numpy as np
 import sympy as sp
-import networkx as nx
+import scipy.sparse
+from scipy.sparse.linalg import eigsh
+from scipy.sparse import csr_matrix
 
 def ihara_zeta_poly(A):
     unweighted_A = np.where(A != 0, 1, 0)
@@ -12,7 +14,7 @@ def ihara_zeta_poly(A):
     I = np.identity(V, dtype=int)
     u = sp.symbols('u')
     M = I - (u * unweighted_A) + ((u ** 2) * (D - I))
-    det_M = sp.Matrix(M).det()
+    det_M = sp.SparseMatrix(M).det()
     inverse_zeta = (1 - u**2)**(r - 1) * det_M
     return inverse_zeta
 
@@ -28,7 +30,7 @@ def ihara_zeta_roots(A):
         [I, zero_matrix]
     ])
     eigenvalues = np.linalg.eigvals(B)
-    roots = 1.0 / eigenvalues[eigenvalues != 0]
+    roots = 1.0 / eigenvalues[np.abs(eigenvalues) > 1e-10]
     return roots
     
 def bartholdi_zeta_poly(A, t_val=None):
@@ -41,7 +43,7 @@ def bartholdi_zeta_poly(A, t_val=None):
     I = np.identity(V, dtype=int)
     u, t = sp.symbols('u t')
     M = I - (u * unweighted_A) + ((u**2) * (D - ((1 - t) * I)))
-    det_M = sp.Matrix(M).det()
+    det_M = sp.SparseMatrix(M).det()
     inverse_zeta_b = ((1 - ((1 - t)**2) * (u**2))**(r - 1)) * det_M
     if t_val is not None:
         inverse_zeta_b = inverse_zeta_b.subs(t, t_val)
@@ -59,13 +61,13 @@ def bartholdi_zeta_roots(A, t_val):
         [I, zero_matrix]
     ])
     eigenvalues = np.linalg.eigvals(B)
-    bart_roots = 1.0 / eigenvalues[eigenvalues != 0]
+    bart_roots = 1.0 / eigenvalues[np.abs(eigenvalues) > 1e-10]
     return bart_roots
 
 def spectral_zeta_poly(A):
     x = np.sum(A, axis=1)
     D = np.diag(x)
-    L = sp.Matrix((D - A).astype(int))
+    L = sp.SparseMatrix((D - A).astype(int))
     eigenvals = L.eigenvals()
     s = sp.symbols('s')
     zeta_spec_poly = sp.Integer(0)
@@ -78,16 +80,14 @@ def spectral_zeta_val(A, s):
     x = np.sum(A, axis=1)
     D = np.diag(x)
     L = D - A
-    eigenvals = np.linalg.eigvals(L)  
-    zeta_spec_val = 0
-    for val in eigenvals:
-        if abs(val) > 1e-10:
-            zeta_spec_val += val**(-s)
+    eigenvals = np.linalg.eigvals(L)
+    threshold = 1e-10
+    zeta_spec_val = np.sum(eigenvals[eigenvals > threshold]**(-s))
     return zeta_spec_val
 
 def bowen_lanford_zeta_roots(A):
     eigenvals = np.linalg.eigvals(A)
-    inverse_zeta_bl_roots = 1.0 / eigenvals[eigenvals != 0]    
+    inverse_zeta_bl_roots = 1.0 / eigenvals[np.abs(eigenvals) > 1e-10]
     return inverse_zeta_bl_roots
     
 def bowen_lanford_zeta_poly(A):
@@ -95,62 +95,48 @@ def bowen_lanford_zeta_poly(A):
     I = np.identity(V, dtype = int)
     u = sp.symbols('u')    
     M = I - (u * A)
-    inverse_zeta_bl_poly = sp.Matrix(M).det()
+    inverse_zeta_bl_poly = sp.SparseMatrix(M).det()
     return inverse_zeta_bl_poly
 
 def ihara_gap(roots):
     unique_mags = np.unique(np.round(np.abs(roots),decimals=5))
     if len(unique_mags) < 2:
-        raise ValueError("Not enough distinct roots to calculate a spectral gap.")
+        raise ValueError("Error. Not enough distinct roots to calculate a spectral gap.")
     gap = unique_mags[1] - unique_mags[0]
     return float(gap)
 
 def fiedler_value(A):
     x = np.sum(A, axis = 1)
-    D = np.diag(x)
-    L = D - A
-    eigenvals = np.linalg.eigvals(L)
+    D = scipy.sparse.diags(x)
+    sparse_A = csr_matrix(A)
+    L = D - sparse_A
+    eigenvals = eigsh(L, k=2, sigma=0)[0]
     zero_eigenvals = eigenvals[abs(eigenvals) < 1e-10]
     if len(zero_eigenvals) > 1:
         raise ValueError("Error. Graph disconnected.")
-    filtered_eigenvals = eigenvals[eigenvals > 1e-10]
-    sorted_values = np.sort(filtered_eigenvals)
-    if len(sorted_values) < 1:
-        raise ValueError("Error. Not enough non-zero eigenvalues to calculate a spectral gap.")
-    fiedler = sorted_values[0]
+    fiedler = eigenvals[1]
     return float(fiedler)
 
 def laplacian_gap(A, k):
+    if k < 2:
+        raise ValueError("Error. k must be at least 2.")
     x = np.sum(A, axis = 1)
-    D = np.diag(x)
-    L = D - A
-    eigenvals = np.linalg.eigvals(L)
+    D = scipy.sparse.diags(x)
+    sparse_A = csr_matrix(A)
+    L = D - sparse_A
+    eigenvals = eigsh(L, k=k+1, sigma=0)[0]
     zero_eigenvals = eigenvals[abs(eigenvals) < 1e-10]
     if len(zero_eigenvals) > 1:
         raise ValueError("Error. Graph disconnected.")
-    filtered_eigenvals = eigenvals[eigenvals > 1e-10]
-    sorted_values = np.sort(filtered_eigenvals)
-    if len(sorted_values) < 2:
-        raise ValueError("Error. Not enough non-zero eigenvalues to calculate a spectral gap.")
-    if k < 2:
-        raise ValueError("Error. k must be at least 2.")
-    if k-1 >= len(sorted_values):
-        raise ValueError("Error. k exceeds the number of non-zero eigenvalues.")
-    lap_gap = sorted_values[k-1] - sorted_values[k-2]
+    lap_gap = eigenvals[k] - eigenvals[k-1]
     return float(lap_gap)
 
 def tropical_multiply_min(A, B):
-    n = A.shape[0]
-    C = np.zeros((n, n))
-    for i in range(n):
-        C[i, :] = np.min(A[i, :, np.newaxis] + B, axis=0)
+    C = np.min(A[:, :, np.newaxis] + B[np.newaxis, :, :], axis=1)
     return C
     
 def tropical_multiply_max(A, B):
-    n = A.shape[0]
-    C = np.zeros((n, n))
-    for i in range(n):
-        C[i, :] = np.max(A[i, :, np.newaxis] + B, axis=0)
+    C = np.max(A[:, :, np.newaxis] + B[np.newaxis, :, :], axis=1)
     return C
 
 def tropical_trace(A, max_k, mode = "min"):

@@ -29,9 +29,11 @@ Each zeta function is available in two variants. The `_poly` variants use SymPy'
 **Performance and graph size**
 **`_poly` functions** (`ihara_zeta_poly`, `bartholdi_zeta_poly`, `bowen_lanford_zeta_poly`, `spectral_zeta_poly`) compute a symbolic determinant of a $V \times V$ matrix, which runs in $O(V^4)$ time with symbolic arithmetic. These functions become impractical on graphs with more than approximately 30–40 nodes and will hang indefinitely on larger inputs.
 
-**`_roots` functions and eigenvalue-based functions** (`ihara_zeta_roots`, `bartholdi_zeta_roots`, `bowen_lanford_zeta_roots`, `spectral_zeta_val`, `fiedler_value`, `laplacian_gap`) use dense matrix eigenvalue routines running in $O(V^3)$ time and require $O(V^2)$ memory. The Ihara and Bartholdi `_roots` functions operate on a $2V \times 2V$ companion matrix, making them approximately eight times more memory-intensive than the others. These functions become impractical on graphs with more than a few thousand nodes on typical hardware.
+**`_roots` functions and eigenvalue-based functions** (`ihara_zeta_roots`, `bartholdi_zeta_roots`, `bowen_lanford_zeta_roots`, `spectral_zeta_val`) use dense matrix eigenvalue routines running in $O(V^3)$ time and require $O(V^2)$ memory. The Ihara and Bartholdi `_roots` functions operate on a $2V \times 2V$ companion matrix, making them approximately eight times more memory-intensive than the others. These functions become impractical on graphs with more than a few thousand nodes on typical hardware.
 
-**`tropical_trace`** runs in O(max_k · V³) time. For large graphs, keep max_k as small as possible.
+**`fiedler_value` and `laplacian_gap`** use sparse eigenvalue decomposition via SciPy's ARPACK interface with shift-invert, requesting only as many eigenvalues as needed — 2 for `fiedler_value` and $k+1$ for `laplacian_gap`. Both run in approximately $O(k \cdot E)$ time where $E$ is the number of edges, making them efficient on large sparse graphs.
+
+**`tropical_trace`** runs in $O(\text{max\_k} \cdot V^3)$ time. For large graphs, keep `max_k` as small as possible.
 
 **Installation**
 ```bash
@@ -77,8 +79,8 @@ print(gap)
 
 **Gap and connectivity measures**
 * **`ihara_gap(roots)`**: Requires `roots` (NumPy array of complex numbers, as returned by `ihara_zeta_roots`). Returns a float representing the difference between the two smallest distinct root magnitudes.
-* **`fiedler_value(A)`**: Requires `A` (NumPy array). Returns a float representing the Fiedler value — the smallest non-zero eigenvalue of the graph Laplacian ($\lambda_2$), which measures algebraic connectivity. Raises a `ValueError` if the graph is disconnected. Filters eigenvalues smaller than 1e-10.
-* **`laplacian_gap(A, k)`**: Requires `A` (NumPy array) and `k` (integer, must be ≥ 2). Returns a float representing the eigengap $\lambda_{k+1} - \lambda_k$ between the $k$-th and $(k+1)$-th smallest non-zero Laplacian eigenvalues. Raises a `ValueError` if the graph is disconnected or if `k` exceeds the number of available eigenvalues. Filters eigenvalues smaller than 1e-10.
+* **`fiedler_value(A)`**: Requires `A` (NumPy array). Returns a float representing the Fiedler value — the smallest non-zero eigenvalue of the graph Laplacian ($\lambda_2$), which measures algebraic connectivity. Uses sparse eigenvalue decomposition, requesting only the 2 smallest eigenvalues. Raises a `ValueError` if the graph is disconnected.
+* **`laplacian_gap(A, k)`**: Requires `A` (NumPy array) and `k` (integer, must be ≥ 2). Returns a float representing the eigengap $\lambda_{k+1} - \lambda_k$ between the $k$-th and $(k+1)$-th smallest non-zero Laplacian eigenvalues. Uses sparse eigenvalue decomposition, requesting only the $k+1$ smallest eigenvalues. Raises a `ValueError` if the graph is disconnected or if `k` < 2.
 
 **Tropical trace**
-* **`tropical_trace(A, max_k, mode="min")`**: Requires `A` (NumPy array) and `max_k` (integer). The optional `mode` parameter accepts `"min"` (default, min-plus algebra, finds minimum-cost cycles) or `"max"` (max-plus algebra, finds maximum-cost cycles). Evaluates the tropical trace sequence from k=1 to k=`max_k`. Structural zeros are automatically converted to the appropriate identity element (+∞ for min, −∞ for max). Returns a list of floats. Runtime scales as O(`max_k` · V³); keep `max_k` small for large graphs.
+* **`tropical_trace(A, max_k, mode="min")`**: Requires `A` (NumPy array) and `max_k` (integer). The optional `mode` parameter accepts `"min"` (default, min-plus algebra, finds minimum-cost cycles) or `"max"` (max-plus algebra, finds maximum-cost cycles). Evaluates the tropical trace sequence from k=1 to k=`max_k`. Structural zeros are automatically converted to the appropriate identity element (+∞ for min, −∞ for max). Returns a list of floats. Runtime scales as $O(\text{max\_k} \cdot V^3)$; keep `max_k` small for large graphs.
